@@ -1,0 +1,35 @@
+(deflisten desktop-empty :initial "true"
+  `~/.config/eww/desktop-empty.sh`)
+
+;; Usa la variable "desktop-empty" definida en music.yuck (este modulo debe incluirse despues).
+(defpoll todos :interval "2s"
+  :initial '{"items":[],"count":0,"more":0}'
+  `~/.config/eww/todo/todo.sh`)
+
+(defwidget todo-card []
+  (box :class "todo-card" :orientation "v" :space-evenly false :spacing 10
+       :visible {desktop-empty && true}
+
+    (box :space-evenly false
+      (label :class "todo-title" :halign "start" :hexpand true :text "Cosas por hacer")
+      (label :class "todo-count" :halign "end" :text {todos.count}))
+
+    (box :orientation "v" :space-evenly false :spacing 8
+         :visible {todos.count > 0}
+      (for t in {todos.items}
+        (box :class "todo-item" :space-evenly false :spacing 10
+          (label :class "todo-dot" :valign "start" :text "○")
+          (label :class "todo-text" :halign "start" :hexpand true
+                 :xalign 0 :wrap true :limit-width 34 :text t))))
+
+    (label :class "todo-more" :halign "start"
+           :visible {todos.more > 0} :text "+${todos.more} más")
+    (label :class "todo-empty" :halign "start"
+           :visible {todos.count == 0} :text "Nada pendiente")))
+
+(defwindow todo
+  :monitor 0
+  :geometry (geometry :x "24px" :y "24px" :width "320px" :anchor "top right")
+  :stacking "bottom"
+  :focusable false
+  (todo-card))
